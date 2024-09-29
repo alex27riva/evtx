@@ -184,9 +184,16 @@ impl EvtxDump {
                 }
             }
             EvtxOutputFormat::JSON => {
+                writeln!(self.output, "[")?;
+                let mut first = true;
                 for record in parser.records_json() {
-                    self.dump_record(record)?
+                    if !first{
+                        writeln!(self.output, ",")?;
+                    }
+                    first = false;
+                    self.dump_record(record)?;
                 }
+                write!(self.output, "]")?;
             }
         };
 
@@ -249,9 +256,9 @@ impl EvtxDump {
 
                 if range_filter {
                     if self.show_record_number {
-                        writeln!(self.output, "Record {}", r.event_record_id)?;
+                        write!(self.output, "{{{}: \"{}\",", "\"Record\"", r.event_record_id)?;
                     }
-                    writeln!(self.output, "{}", r.data)?;
+                    write!(self.output, "\"data\": {}}}", r.data)?;
                 }
             }
             // This error is non fatal.
